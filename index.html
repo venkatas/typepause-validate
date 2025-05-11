@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Form Validation POC</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+    }
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    input {
+      padding: 0.5rem;
+      font-size: 1rem;
+      width: 100%;
+    }
+    .error {
+      color: red;
+      margin-top: 0.3rem;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <h2>Smart Validation Form</h2>
+
+  <div class="form-group">
+    <label>Email Address</label>
+    <input type="text" id="emailInput" placeholder="Enter your email" />
+    <div class="error" id="emailError"></div>
+  </div>
+
+  <div class="form-group">
+    <label>Credit Card Number</label>
+    <input type="text" id="cardInput" placeholder="Enter your credit card number" />
+    <div class="error" id="cardError"></div>
+  </div>
+
+  <div class="form-group">
+    <label>Aadhaar Number</label>
+    <input type="text" id="aadhaarInput" placeholder="Enter your Aadhaar number" />
+    <div class="error" id="aadhaarError"></div>
+  </div>
+
+  <div class="form-group">
+    <label>Mobile Number</label>
+    <input type="text" id="mobileInput" placeholder="Enter your mobile number" />
+    <div class="error" id="mobileError"></div>
+  </div>
+
+  <script>
+    const validators = [
+      {
+        inputId: "emailInput",
+        errorId: "emailError",
+        regex: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+        errorText: "⚠️ Please enter a valid email address"
+      },
+      {
+        inputId: "cardInput",
+        errorId: "cardError",
+        regex: /^\d{16}$/,
+        errorText: "⚠️ Credit card number must be 16 digits"
+      },
+      {
+        inputId: "aadhaarInput",
+        errorId: "aadhaarError",
+        regex: /^\d{12}$/,
+        errorText: "⚠️ Aadhaar number must be 12 digits"
+      },
+      {
+        inputId: "mobileInput",
+        errorId: "mobileError",
+        regex: /^[6-9]\d{9}$/,
+        errorText: "⚠️ Mobile number must be 10 digits and start with 6-9"
+      }
+    ];
+
+    let isPageVisible = true;
+    document.addEventListener("visibilitychange", () => {
+      isPageVisible = !document.hidden;
+    });
+
+    validators.forEach(({ inputId, errorId, regex, errorText }) => {
+      const input = document.getElementById(inputId);
+      const error = document.getElementById(errorId);
+      let typingTimer, lastKeyTime = 0;
+
+      input.addEventListener("input", () => {
+        const now = Date.now();
+        const typingSpeed = now - lastKeyTime;
+        lastKeyTime = now;
+
+        clearTimeout(typingTimer);
+        error.textContent = "";
+
+        const wait = Math.min(Math.max(typingSpeed * 1.5, 800), 2000);
+
+        typingTimer = setTimeout(() => {
+          if (!isPageVisible) return;
+          const val = input.value.trim();
+          if (!val) {
+            error.textContent = "";
+            return;
+          }
+          if (!regex.test(val)) {
+            error.textContent = errorText;
+          } else {
+            error.textContent = "";
+          }
+        }, wait);
+      });
+    });
+  </script>
+</body>
+</html>
